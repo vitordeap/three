@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { DevPanel } from './panel_control.ts';
-import { GLTFLoader } from 'three/examples/jsm/Addons.js';
+import { FBXLoader } from 'three/examples/jsm/Addons.js';
+import { MapControls } from 'three/addons/controls/MapControls.js';
 
 export function setup_scene(
     renderer: THREE.Renderer,
@@ -110,7 +111,7 @@ function create_plane() {
 }
 
 function create_light() {
-    const light = new THREE.DirectionalLight('0xffffff', 5);
+    const light = new THREE.DirectionalLight('0xffffff', 10);
     light.position.set(-30, 30, 0);
     light.castShadow = true;
     light.shadow.camera.far = 50;
@@ -123,14 +124,25 @@ function create_light() {
 }
 
 function import_3dmodel(scene) {
-    const url = new URL('./assets/shiba/scene.gltf', import.meta.url);
-    const loader = new GLTFLoader();
-    loader.load(url.href, (gltf) => {
-        gltf.scene.scale.set(0.5, 0.5, 0.5);
-        gltf.scene.position.set(0, 0.5, -1);
-        gltf.scene.castShadow = true;
-
-        scene.add(gltf.scene);
+    const url = new URL('./assets/bookcase/Bookcase.FBX', import.meta.url);
+    const texture = new THREE.TextureLoader().load(
+        'assets/bookcase/Bookcase Textures/',
+    );
+    const loader = new FBXLoader();
+    loader.load(url.href, (fbx) => {
+        fbx.scale.set(1 / 20, 1 / 20, 1 / 20);
+        fbx.position.set(0, 0, -1.5);
+        fbx.rotateY(-Math.PI / 4);
+        fbx.traverse((obj) => {
+            if (obj instanceof THREE.Mesh) {
+                obj.material = new THREE.MeshStandardMaterial({
+                    map: texture,
+                });
+                obj.castShadow = true;
+                obj.material.needsupdate = true;
+            }
+        });
+        scene.add(fbx);
     });
 }
 

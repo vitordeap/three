@@ -9,7 +9,7 @@ export const env = {
 
 console.log(`Is production? ${env.production}`);
 // Creating the renderer
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(env.render_sizes[0], env.render_sizes[1]);
 renderer.shadowMap.enabled = true;
 
