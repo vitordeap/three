@@ -11,6 +11,8 @@ console.log(`Is production? ${env.production}`);
 // Creating the renderer
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(env.render_sizes[0], env.render_sizes[1]);
+renderer.shadowMap.enabled = true;
+
 document.body.appendChild(renderer.domElement);
 
 // Creating a scene
