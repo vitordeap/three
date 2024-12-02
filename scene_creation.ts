@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { DevPanel } from './panel_control.ts';
-import { sin } from 'three/webgpu';
-import { ThreeMFLoader } from 'three/examples/jsm/Addons.js';
+import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 
 export function setup_scene(
     renderer: THREE.Renderer,
@@ -30,6 +29,9 @@ export function setup_scene(
     // Adiciona luz
     const light = create_light();
     scene.add(light);
+
+    // Adiciona modelo 3D importado (format gltf)
+    const model = import_3dmodel(scene);
 
     // Adiciona DevPanel
     if (!import.meta.env.PROD) {
@@ -118,6 +120,18 @@ function create_light() {
     light.shadow.mapSize.height = 2048;
 
     return light;
+}
+
+function import_3dmodel(scene) {
+    const url = new URL('./assets/shiba/scene.gltf', import.meta.url);
+    const loader = new GLTFLoader();
+    loader.load(url.href, (gltf) => {
+        gltf.scene.scale.set(0.5, 0.5, 0.5);
+        gltf.scene.position.set(0, 0.5, -1);
+        gltf.scene.castShadow = true;
+
+        scene.add(gltf.scene);
+    });
 }
 
 function add_dev_panel(sphere: THREE.Mesh) {
