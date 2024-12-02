@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "Testing with Threejs",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
-    "start": "NODE_ENV='production' node server.js"
+    "start": "NODE_ENV='production' vite serve"
   },
   "repository": {
     "type": "git",
