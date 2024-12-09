@@ -1,16 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Three.js with TypeScript</title>
-  </head>
-  <body>
-    <script type="module" src="./main.ts"></script>
-  </body>
-  <style>
-    body {
+  <script type="module" src="main.ts"></script>
+  <title>Demo Application</title>
+    <style>
+      #jscad{
+        width: 15cm;
+        height: 15cm;
         margin: 0;
-    }
-  </style>
+        outline: 1px solid black;
+      }
+    </style>
+</head>
+<body>
+  <h1>DEMO APP</h1>
+  <button id="scaledown">SCALE -</button>
+  <button id="scaleup">SCALE +</button>
+  <div id="jscad"></div>
+</body>
 </html>
