@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { DevPanel } from './panel_control.ts';
 import { FBXLoader, GLTFLoader } from 'three/examples/jsm/Addons.js';
 
-export function setup_scene(
+export async function setup_scene(
     renderer: THREE.Renderer,
     scene: THREE.Scene,
     camera: THREE.Camera,
@@ -31,7 +31,11 @@ export function setup_scene(
     scene.add(light);
 
     // Adiciona modelo 3D importado (format gltf)
-    const model = import_3dmodel(scene);
+    const model = await import_3dmodel(scene);
+    const mixer = new THREE.AnimationMixer(model.scene);
+    const clock = new THREE.Clock();
+    let animation_action = mixer.clipAction(model.animations[0]);
+    animation_action.play();
 
     // Adiciona DevPanel
     if (!import.meta.env.PROD) {
@@ -41,6 +45,14 @@ export function setup_scene(
     // // Animação
     const animate = () => {
         const frame = requestAnimationFrame(animate);
+        mixer.update(clock.getDelta());
+
+        if (animation_action) {
+            const time = animation_action.time; // Current time of the animation
+            const duration = animation_action.getClip().duration; // Total duration of the clip
+            const frame = Math.floor((time / duration) * 30); // Assuming 30 frames per second
+        }
+
         sphere.position.y = 0.75 + 0.5 * Math.sin(frame / 20);
         cube.rotation.x += 0.01;
         cube.rotation.y += 0.01;
@@ -122,30 +134,38 @@ function create_light() {
     return light;
 }
 
-function import_3dmodel(scene) {
+async function import_3dmodel(scene) {
     const url = new URL(
-        'assets/cube/PartDesignExample-Body.gltf',
+        'assets/box_animation/Box-size-animation.glb',
         import.meta.url,
     );
     const loader = new GLTFLoader();
-    loader.load(url.href, (gltf) => {
-        gltf.scene.scale.set(3, 3, 3);
-        gltf.scene.position.set(0, 0.5, -1);
+    const model3d = loader.loadAsync(url.href).then((gltf) => {
+        gltf.scene.scale.set(0.1, 0.1, 0.1);
+        gltf.scene.position.set(0, 0.1, -1);
         gltf.scene.rotateY(-Math.PI / 4);
 
-        gltf.scene.children[0].children.forEach((child) => {
-            if (child instanceof THREE.Mesh) {
-                console.log('A CHILD!');
-                child.material = new THREE.MeshStandardMaterial({
-                    color: 0xe61919,
-                });
-                child.castShadow = true;
-                child.receiveShadow = true;
-            }
-        });
+        function update_children(mesh) {
+            mesh.children.forEach((child) => {
+                if (child.children && child.children.length > 0) {
+                    update_children(child);
+                } else if (child instanceof THREE.Mesh) {
+                    child.material = new THREE.MeshStandardMaterial({
+                        color: 0xe61919,
+                    });
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            });
+        }
 
+        update_children(gltf.scene);
+
+        console.log(gltf.scene);
         scene.add(gltf.scene);
+        return gltf;
     });
+    return await model3d;
 }
 
 function add_dev_panel(sphere: THREE.Mesh) {
